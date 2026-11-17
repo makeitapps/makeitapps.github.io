@@ -64,6 +64,30 @@
   .play svg { width: 18px; height: 18px; }
   .soon { display: inline-block; text-align: center; padding: 10px 16px; border-radius: 12px; border: 1px dashed var(--line); color: var(--muted); font-weight: 600; font-size: .92rem; }
 
+
+  /* music player */
+  .player { background: linear-gradient(160deg, rgba(61,139,255,.14), rgba(255,255,255,.04)); border: 1px solid var(--line); border-radius: 24px; padding: 22px; }
+  .now { display: flex; align-items: center; gap: 16px; }
+  .nowinfo { flex: 1; min-width: 0; }
+  .ntitle { font-family: Poppins, sans-serif; font-weight: 700; font-size: 1.15rem; margin-bottom: 4px; }
+  .seek { display: flex; align-items: center; gap: 10px; color: var(--muted); font-size: .82rem; font-variant-numeric: tabular-nums; }
+  .seek input { flex: 1; accent-color: var(--cyan); }
+  .pbtn { width: 42px; height: 42px; border-radius: 50%; border: 1px solid var(--line); background: rgba(255,255,255,.06); color: var(--text); cursor: pointer; display: grid; place-items: center; }
+  .pbtn svg { width: 20px; height: 20px; fill: currentColor; }
+  .pbtn.big { width: 58px; height: 58px; border: 0; background: linear-gradient(135deg, var(--cyan), var(--blue)); box-shadow: 0 8px 24px rgba(61,139,255,.45); color: #fff; }
+  .pbtn.big svg { width: 26px; height: 26px; }
+  .pnav { display: flex; gap: 8px; }
+  .bars { display: flex; align-items: flex-end; gap: 3px; height: 34px; margin: 18px 0 6px; }
+  .bars span { flex: 1; background: linear-gradient(var(--cyan), var(--blue)); border-radius: 3px; height: 15%; opacity: .55; transition: height .25s; }
+  .playing .bars span { animation: eq 1s ease-in-out infinite alternate; opacity: .9; }
+  @keyframes eq { from { height: 12%; } to { height: 100%; } }
+  .tracks { list-style: none; margin: 12px 0 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 8px; }
+  .tracks li { display: flex; align-items: center; gap: 10px; padding: 10px 12px; border-radius: 12px; cursor: pointer; border: 1px solid transparent; color: var(--muted); }
+  .tracks li:hover { background: rgba(255,255,255,.05); color: var(--text); }
+  .tracks li.on { border-color: rgba(90,215,255,.45); background: rgba(90,215,255,.08); color: var(--text); }
+  .tracks .no { width: 26px; height: 26px; border-radius: 8px; display: grid; place-items: center; background: rgba(255,255,255,.07); font-size: .8rem; font-weight: 600; }
+  .tracks .len { margin-left: auto; font-size: .8rem; font-variant-numeric: tabular-nums; }
+
   /* about */
   .about { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 18px; }
   .point { background: var(--card); border: 1px solid var(--line); border-radius: 18px; padding: 20px; }
@@ -95,7 +119,7 @@
 <header>
   <div class="wrap bar">
     <a class="brand" href="#top"><img class="mark" src="makeitapps-mark.webp" alt=""><span>Make<span class="it">IT</span>apps</span></a>
-    <nav><a href="#games">Games</a><a href="#about">About</a><a href="#privacy">Privacy</a></nav>
+    <nav><a href="#games">Games</a><a href="#music">Music</a><a href="#about">About</a><a href="#privacy">Privacy</a></nav>
   </div>
 </header>
 
@@ -132,6 +156,29 @@
     </div>
   </section>
 
+  <section id="music">
+    <div class="wrap">
+      <h2>Original music</h2>
+      <p class="sub">Our own soundtrack, composed and produced by MakeITapps. You'll hear these tracks in our games.</p>
+      <div class="player">
+        <div class="now">
+          <button class="pbtn big" id="pPlay" aria-label="Play"><svg viewBox="0 0 24 24"><path id="pIcon" d="M8 5v14l11-7z"/></svg></button>
+          <div class="nowinfo">
+            <div class="ntitle" id="pTitle">Track 1</div>
+            <div class="seek"><span id="pCur">0:00</span><input type="range" id="pSeek" min="0" max="1000" value="0" aria-label="Seek"><span id="pDur">0:00</span></div>
+          </div>
+          <div class="pnav">
+            <button class="pbtn" id="pPrev" aria-label="Previous"><svg viewBox="0 0 24 24"><path d="M6 6h2v12H6zm3.5 6 8.5 6V6z"/></svg></button>
+            <button class="pbtn" id="pNext" aria-label="Next"><svg viewBox="0 0 24 24"><path d="M16 6h2v12h-2zM6 18l8.5-6L6 6z"/></svg></button>
+          </div>
+        </div>
+        <div class="bars" id="pBars" aria-hidden="true"></div>
+        <ol class="tracks" id="pList"></ol>
+      </div>
+      <audio id="pAudio" preload="none"></audio>
+    </div>
+  </section>
+
   <section id="privacy">
     <div class="wrap">
       <h2>Privacy policies</h2>
@@ -144,7 +191,7 @@
 <footer>
   <div class="wrap foot">
     <div>© <span id="year">2026</span> MakeITapps · Finland</div>
-    <div><a href="#games">Games</a><a href="#privacy">Privacy</a><a href="app-ads.txt">app-ads.txt</a></div>
+    <div><a href="#games">Games</a><a href="#music">Music</a><a href="#privacy">Privacy</a><a href="app-ads.txt">app-ads.txt</a></div>
   </div>
 </footer>
 
@@ -168,16 +215,19 @@ const GAMES = [
   { name: "Gold Casino", genre: "Casino (play money)", icon: "icon-goldcasino.webp",
     id: "", live: false, privacy: "",
     text: "15 casino games with slots, bonus games and blackjack. Free daily coins. Play money only: no real-money gambling and no cash prizes. 18+." },
-  { name: "MISE - Recipebook", genre: "Recipe app", icon: "icon-mise.webp",
+  { name: "MISE-recipebook", genre: "Recipe app", icon: "icon-mise.webp",
     id: "", live: false, privacy: "",
     text: "Your pocket cookbook. Browse recipes by category, discover popular dishes from around the world and cook step by step in your own language." },
-  { name: "LumiPour", genre: "Color sort puzzle", emoji: "🧪", colors: ["#7b5cff", "#38d6ff"],
+  { name: "LumiPour", genre: "Color sort puzzle", icon: "icon-lumipour.webp",
     id: "com.makeitapps.lumipour", live: false, privacy: "",
     text: "Pour glowing liquids into the right bottles. 100 relaxing levels across 5 beautiful worlds." },
-  { name: "Bunny Dash: Farm Escape", genre: "3D runner", emoji: "🐰", colors: ["#7ddc5a", "#1fae6b"],
+  { name: "Bunny Dash: Farm Escape", genre: "3D runner", icon: "icon-bunnydash.webp",
     id: "com.makeitapps.bunnydash", live: false, privacy: "",
-    text: "Dash across the farm, dodge obstacles and collect carrots. 50 levels with three stars to win on each." },
-  { name: "Summer Games", genre: "Sports arcade", emoji: "🏅", colors: ["#ffcb3d", "#ff7a1a"],
+    text: "Dash across the farm, dodge obstacles and collect carrots. 50 levels with three stars to win on each, and an original soundtrack." },
+  { name: "Neon Pulse", genre: "Rhythm game", icon: "icon-neonpulse.webp",
+    id: "", live: false, privacy: "",
+    text: "Jump, fly and flip gravity to the beat. 8 hard, fast-paced neon maps with rocket and upside-down sections." },
+  { name: "Summer Games", genre: "Sports arcade", icon: "icon-summergames.webp",
     id: "com.makeitapps.summergames", live: false, privacy: "",
     text: "Sprint, jump and throw your way to gold in five track & field events and a full tournament." }
 ];
@@ -212,6 +262,48 @@ GAMES.forEach(g => {
 if (!pgrid.children.length) {
   pgrid.innerHTML = `<div class="point"><b>Coming soon</b><span>Privacy policies will be listed here as our games are released.</span></div>`;
 }
+
+/* ===== MUSIC PLAYER ===== (mp3 files are in the same folder as index.html) */
+const TRACKS = [
+  ["track01.mp3","3:18"],["track02.mp3","3:24"],["track03.mp3","3:22"],["track04.mp3","3:14"],
+  ["track05.mp3","3:09"],["track06.mp3","1:30"],["track07.mp3","3:18"],["track08.mp3","2:40"],
+  ["track09.mp3","2:14"],["track10.mp3","2:11"],["track11.mp3","3:32"]
+];
+(() => {
+  const audio = document.getElementById("pAudio"), list = document.getElementById("pList"),
+        title = document.getElementById("pTitle"), seek = document.getElementById("pSeek"),
+        cur = document.getElementById("pCur"), dur = document.getElementById("pDur"),
+        icon = document.getElementById("pIcon"), player = document.querySelector(".player"),
+        bars = document.getElementById("pBars");
+  for (let i = 0; i < 40; i++) { const b = document.createElement("span"); b.style.animationDelay = (-(i * 37 % 100) / 100) + "s"; b.style.animationDuration = (0.6 + (i * 13 % 7) / 10) + "s"; bars.appendChild(b); }
+  let idx = 0;
+  const fmt = t => isFinite(t) ? Math.floor(t / 60) + ":" + String(Math.floor(t % 60)).padStart(2, "0") : "0:00";
+  TRACKS.forEach((t, i) => {
+    const li = document.createElement("li");
+    li.innerHTML = `<span class="no">${i + 1}</span>Track ${i + 1}<span class="len">${t[1]}</span>`;
+    li.onclick = () => { if (i === idx && audio.src) toggle(); else load(i, true); };
+    list.appendChild(li);
+  });
+  function load(i, play) {
+    idx = (i + TRACKS.length) % TRACKS.length;
+    audio.src = TRACKS[idx][0];
+    title.textContent = "Track " + (idx + 1);
+    dur.textContent = TRACKS[idx][1];
+    [...list.children].forEach((li, j) => li.classList.toggle("on", j === idx));
+    if (play) audio.play().catch(() => {});
+  }
+  function toggle() { if (!audio.src) return load(idx, true); audio.paused ? audio.play().catch(() => {}) : audio.pause(); }
+  document.getElementById("pPlay").onclick = toggle;
+  document.getElementById("pPrev").onclick = () => load(idx - 1, true);
+  document.getElementById("pNext").onclick = () => load(idx + 1, true);
+  audio.onplay = () => { icon.setAttribute("d", "M6 5h4v14H6zm8 0h4v14h-4z"); player.classList.add("playing"); };
+  audio.onpause = () => { icon.setAttribute("d", "M8 5v14l11-7z"); player.classList.remove("playing"); };
+  audio.onended = () => load(idx + 1, true);
+  audio.ontimeupdate = () => { cur.textContent = fmt(audio.currentTime); if (audio.duration) { seek.value = audio.currentTime / audio.duration * 1000; dur.textContent = fmt(audio.duration); } };
+  seek.oninput = () => { if (audio.duration) audio.currentTime = seek.value / 1000 * audio.duration; };
+  [...list.children][0].classList.add("on");
+  dur.textContent = TRACKS[0][1];
+})();
 document.getElementById("year").textContent = new Date().getFullYear();
 </script>
 </body>
